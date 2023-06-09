@@ -54,7 +54,7 @@ jobs:
             DOCKER_PATH: dienpp/uda-final
             TAG: latest
           command: |
-            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
+            docker login --username $DOCKERHUB_USERNAME --password $DOCKERHUB_PASSWORD
             docker tag uda-final $DOCKER_PATH:$CIRCLE_WORKFLOW_ID
             docker push $DOCKER_PATH:$CIRCLE_WORKFLOW_ID
 
