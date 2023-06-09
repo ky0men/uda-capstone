@@ -19,6 +19,7 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install --no-cache-dir -r requirements.txt
+            echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
             apk update
             apk add --no-cache hadolint
       - save_cache:
