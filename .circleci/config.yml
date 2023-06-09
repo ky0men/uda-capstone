@@ -21,7 +21,7 @@ jobs:
             pip install --upgrade pip
             pip install --no-cache-dir -r requirements.txt
             curl -sL -o hadolint "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-$(uname -s)-$(uname -m)"
-            sudo install hadolint /usr/local/bin/
+            sudo install hadolint
       - save_cache:
           paths:
             - ./venv
