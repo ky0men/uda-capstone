@@ -3,7 +3,8 @@ version: 2.1
 jobs:
   test-lint:
     docker:
-      - image: python:3.9-alpine
+      - image: circleci/python:3.6.7-stretch
+    working_directory: ~/repo
     steps:
       - checkout
       # Download and cache dependencies
@@ -17,17 +18,15 @@ jobs:
           command: |
             python3 -m venv venv
             . venv/bin/activate
-            pip install --upgrade pip
             pip install --no-cache-dir -r requirements.txt
-            echo "http://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories
-            apk update
-            apk add --no-cache hadolint
+            curl -sL -o hadolint "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-$(uname -s)-$(uname -m)"
+            sudo install hadolint /usr/local/bin/
       - save_cache:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-      # run lint!
+      # run lints!
       - run:
           name: run lint
           command: |
