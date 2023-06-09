@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   test-lint:
     docker:
-      - image: python:3.7.3-stretch
+      - image: python:3.9-buster
     steps:
       - checkout
       # Download and cache dependencies
@@ -226,13 +226,13 @@ workflows:
   default:
     jobs:
       - test-lint
-      - upload-docker:
-          requires:
-            - test-lint
-          filters:
-            branches:
-              only:
-                - master
+      # - upload-docker:
+      #     requires:
+      #       - test-lint
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
       # - deploy-infrastructure:
       #     filters:
       #       branches:
