@@ -33,31 +33,28 @@ jobs:
             . venv/bin/activate
             make lint
 
-  # upload-docker:
-  #   docker:
-  #     - image: circleci/golang:1.15
-
-  #   working_directory: ~/repo
-
-  #   steps:
-  #     - checkout
-
-  #     - setup_remote_docker:
-  #         version: 19.03.13
-
-  #     - run:
-  #         name: Build docker container
-  #         command: |
-  #           docker build --tag=$DOCKER_IMAGE_NAME .
-  #           docker image ls
-
-  #     - run:
-  #         name: Upload Docker to Dockerhub
-  #         command: |
-  #           echo "Docker ID and Image: $DOCKER_IMAGE_NAME"
-  #           docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
-  #           docker tag $DOCKER_IMAGE_NAME $DOCKERHUB_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_WORKFLOW_ID
-  #           docker push $DOCKERHUB_USERNAME/$DOCKER_IMAGE_NAME:$CIRCLE_WORKFLOW_ID
+  upload-docker:
+    docker:
+      - image: circleci/ubuntu-latest
+    working_directory: ~/repo
+    steps:
+      - checkout
+      - run:
+          name: Build docker image
+          command: |
+            docker build --tag=uda-final .
+            docker image ls
+      - run:
+          name: Upload image to dockerhub
+          env:
+            DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+            DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+            DOCKER_PATH: dienpp/uda-final
+            TAG: latest
+          command: |
+            docker login -u="$DOCKERHUB_USERNAME" -p="$DOCKERHUB_PASSWORD"
+            docker tag uda-final $DOCKER_PATH:$CIRCLE_WORKFLOW_ID
+            docker push $DOCKER_PATH:$CIRCLE_WORKFLOW_ID
 
   # deploy-infrastructure:
   #   docker:
@@ -227,13 +224,13 @@ workflows:
   default:
     jobs:
       - test-lint
-      # - upload-docker:
-      #     requires:
-      #       - test-lint
-      #     filters:
-      #       branches:
-      #         only:
-      #           - master
+      - upload-docker:
+          requires:
+            - test-lint
+          filters:
+            branches:
+              only:
+                - master
       # - deploy-infrastructure:
       #     filters:
       #       branches:
