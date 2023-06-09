@@ -3,7 +3,7 @@ version: 2.1
 jobs:
   test-lint:
     docker:
-      - image: python:3.9-buster
+      - image: python:3.9-alpine
     steps:
       - checkout
       # Download and cache dependencies
@@ -19,8 +19,8 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install --no-cache-dir -r requirements.txt
-            curl -sL -o hadolint "https://github.com/hadolint/hadolint/releases/latest/download/hadolint-$(uname -s)-$(uname -m)"
-            sudo apt-get update && sudo apt-get install hadolint /usr/local/bin/
+            apk update
+            apk add --no-cache hadolint
       - save_cache:
           paths:
             - ./venv
