@@ -1,0 +1,202 @@
+---
+Description: Create VPC
+
+Resources:
+
+  myVPC: #create VPC
+    Type: 'AWS::EC2::VPC'
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: 'true'
+      EnableDnsHostnames: 'true'
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-vpc
+
+  PublicSubnet1a: #crate public subnet
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref myVPC
+      AvailabilityZone: 'us-east-1a'
+      CidrBlock: 10.0.0.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-public-subnet-a01
+        - Key: kubernetes.io/role/elb
+          Value: 1
+
+  PublicSubnet1b: #crate public subnet
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref myVPC
+      AvailabilityZone: 'us-east-1b'
+      CidrBlock: 10.0.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-public-subnet-b01
+        - Key: kubernetes.io/role/elb
+          Value: 1
+
+  PrivateSubnet1a: #crate private subnet
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref myVPC
+      AvailabilityZone: 'us-east-1a'
+      CidrBlock:  10.0.2.0/24
+      MapPublicIpOnLaunch: false 
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-private-subnet-a01
+        - Key: kubernetes.io/role/elb
+          Value: 1
+
+  PrivateSubnet1b: #crate private subnet
+    Type: 'AWS::EC2::Subnet'
+    Properties:
+      VpcId: !Ref myVPC
+      AvailabilityZone: 'us-east-1b'
+      CidrBlock: 10.0.3.0/24
+      MapPublicIpOnLaunch: false 
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-private-subnet-b01
+        - Key: kubernetes.io/role/elb
+          Value: 1
+
+#==============================================================================
+
+  InternetGateway:
+    Type: 'AWS::EC2::InternetGateway'
+    Properties: {}
+
+  VPCGatewayAttachment: #attach internet gateway to vpc
+    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Properties:
+      InternetGatewayId: !Ref InternetGateway
+      VpcId: !Ref myVPC
+
+  #==============================================================================
+# Public subnet A
+  PublicRouteTableA: #create public route table
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId: !Ref myVPC
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-public-route-a
+
+  PrivateRouteTableA: #create private route table
+    Type: 'AWS::EC2::RouteTable'
+    Properties:
+      VpcId:  !Ref myVPC 
+      Tags:
+        - Key: Name
+          Value: !Sub ${EnvironmentName}-private-route-a
+
+  AddPublicSubnetToPublicRouteTable1a: #add public subnet to route table
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PublicRouteTableA
+      SubnetId: !Ref PublicSubnet1a
+
+  AddPrivateSubnet1aToPrivateRouteTable1a: #add private subnet to route table
+    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Properties:
+      RouteTableId: !Ref PrivateRouteTableA
+      SubnetId: !Ref PrivateSubnet1a
+
+#==============================================================================
+
+  NatGateway1EIP:
+      Type: AWS::EC2::EIP
+      DependsOn: VPCGatewayAttachment
+      Properties: 
+          Domain: vpc
+
+  NatGateway2EIP:
+      Type: AWS::EC2::EIP
+      DependsOn: VPCGatewayAttachment
+      Properties:
+          Domain: vpc
+
+  NatGateway1: 
+      Type: AWS::EC2::NatGateway
+      Properties: 
+          AllocationId: !GetAtt NatGateway1EIP.AllocationId
+          SubnetId: !Ref PublicSubnet1a
+
+  NatGateway2: 
+      Type: AWS::EC2::NatGateway
+      Properties:
+          AllocationId: !GetAtt NatGateway2EIP.AllocationId
+          SubnetId: !Ref PublicSubnet1b
+
+#========================================
+
+  PublicRoute:
+    DependsOn: VPCGatewayAttachment
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  ControlPlaneSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Cluster communication with worker nodes
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+#==============================================================================
+Outputs:
+  VpcId:
+    Value: !Ref myVPC
+    Export:
+      Name: !Sub ${EnvironmentName}-VPC
+  
+  PublicSubnet1aId:
+    Value: !Ref PublicSubnet1a
+    Export:
+      Name: !Sub ${EnvironmentName}-public-subnet-1a
+  
+  PublicSubnet1bId:
+    Value: !Ref PublicSubnet1b
+    Export:
+      Name: !Sub ${EnvironmentName}-public-subnet-1b
+
+  PrivateSubnet1aId:
+    Value: !Ref PrivateSubnet1a
+    Export:
+      Name: !Sub ${EnvironmentName}-private-subnet-1a
+
+  PrivateSubnet1bId:
+    Value: !Ref PrivateSubnet1b
+    Export:
+      Name: !Sub ${EnvironmentName}-private-subnet-1b
+
+  PublicRouteTableAId:
+    Value:  !Ref PublicRouteTableA
+    Export:
+      Name: !Sub ${EnvironmentName}-public-routetable-a
+
+  PrivateRouteTableAId:
+    Value:  !Ref PrivateRouteTableA
+    Export:
+      Name: !Sub ${EnvironmentName}-private-routetable-a
+
+  PublicRouteTableBId:
+    Value:  !Ref PublicRouteTableB
+    Export:
+      Name: !Sub ${EnvironmentName}-public-routetable-b
+
+  PrivateRouteTableBId:
+    Value:  !Ref PrivateRouteTableB
+    Export:
+      Name: !Sub ${EnvironmentName}-private-routetable-b
