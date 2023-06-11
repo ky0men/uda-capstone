@@ -64,7 +64,6 @@ jobs:
       - run:
           name: Ensure EKS network exists
           command: |
-            aws configure list
             aws cloudformation deploy \
               --template-file .circleci/files/network.yml \
               --tags project=uda-capstone \
