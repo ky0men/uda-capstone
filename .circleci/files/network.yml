@@ -195,8 +195,3 @@ Outputs:
     Value:  !Ref PrivateRouteTableA
     Export:
       Name: !Sub ${EnvironmentName}-private-routetable-a
-
-  PrivateRouteTableBId:
-    Value:  !Ref PrivateRouteTableB
-    Export:
-      Name: !Sub ${EnvironmentName}-private-routetable-b
