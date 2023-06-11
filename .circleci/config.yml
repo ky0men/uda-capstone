@@ -77,6 +77,7 @@ jobs:
               --tags project=uda-capstone \
               --stack-name "eks-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
               --region ${AWS_DEFAULT_REGION} \
+              -capabilities CAPABILITY_NAMED_IAM
       # - run:
       #     name: Ensure Nodegroup exists
       #     command: |
