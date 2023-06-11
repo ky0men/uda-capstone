@@ -73,13 +73,10 @@ jobs:
           name: Ensure EKS Cluster exists
           command: |
             aws cloudformation deploy \
-              --template-file cloudformation/cluster.yml \
-              --tags project=${ENVIRONMENT_NAME}-project \
-              --stack-name "${ENVIRONMENT_NAME}-eks-cluster" \
+              --template-file .circleci/files/eks.yml \
+              --tags project=uda-capstone \
+              --stack-name "eks-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
               --region ${AWS_DEFAULT_REGION} \
-              --parameter-overrides file://cloudformation/cluster-parameters.json \
-              --capabilities CAPABILITY_NAMED_IAM
-          no_output_timeout: 15m
       # - run:
       #     name: Ensure Nodegroup exists
       #     command: |
