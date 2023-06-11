@@ -27,7 +27,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-public-subnet-a01
+          Value: !Sub ${EnvironmentName}-PublicSubnet1a
         - Key: kubernetes.io/role/elb
           Value: 1
 
@@ -40,7 +40,7 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Name
-          Value: !Sub ${EnvironmentName}-public-subnet-b01
+          Value: !Sub ${EnvironmentName}-PublicSubnet1b
         - Key: kubernetes.io/role/elb
           Value: 1
 
@@ -148,7 +148,7 @@ Resources:
       DestinationCidrBlock: 0.0.0.0/0
       GatewayId: !Ref InternetGateway
 
-  ControlPlaneSecurityGroup:
+  SecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Cluster communication with worker nodes
@@ -195,3 +195,15 @@ Outputs:
     Value:  !Ref PrivateRouteTableA
     Export:
       Name: !Sub ${EnvironmentName}-private-routetable-a
+  
+  SubnetIds:
+    Description: Subnets ID
+    Value: !Join [ ",", [ !Ref PublicSubnet1a, !Ref PublicSubnet1b ] ]
+    Export:
+      Name: !Sub ${EnvironmentName}-public-subnet
+
+  SecurityGroup:
+    Description: Security group
+    Value: !Ref SecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-scrt-group
