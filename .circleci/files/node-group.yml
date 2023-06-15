@@ -38,7 +38,7 @@ Resources:
   NodeInstanceRole:
     Type: "AWS::IAM::Role"
     Properties:
-      RoleName: !Sub ${EnvironmentName}-nodegroup-role
+      RoleName: !Sub ${EnvironmentName}-EKSRole
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -58,7 +58,7 @@ Resources:
   NodeGroup:
     Type: AWS::EKS::Nodegroup
     Properties:
-      ClusterName: !Sub ${EnvironmentName}-cluster
+      ClusterName: !Sub ${EnvironmentName}-EKSCluster
       NodeRole: !GetAtt NodeInstanceRole.Arn
       NodegroupName: !Sub ${EnvironmentName}-nodegroup
       ScalingConfig:
