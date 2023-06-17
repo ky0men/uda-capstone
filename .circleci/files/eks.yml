@@ -50,7 +50,7 @@ Resources:
 Outputs:
   EksId:
     Description: EKS id
-    Value: !Ref EKSCluster
+    Value: !Ref CapstoneProjectCluster
     Export:
       Name: !Sub ${EnvironmentName}-EKSCluster
 
