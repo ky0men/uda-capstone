@@ -9,6 +9,7 @@ Resources:
   ClusterInstanceProfile:
     Type: AWS::IAM::InstanceProfile
     Properties:
+      InstanceProfileName: !Sub ${EnvironmentName}-cluster-profile
       Path: "/"
       Roles:
         - !Ref EKSClusterRole
@@ -16,6 +17,7 @@ Resources:
   EKSClusterRole:
     Type: AWS::IAM::Role
     Properties:
+      RoleName: !Sub ${EnvironmentName}-cluster-role
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -31,10 +33,11 @@ Resources:
         - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
         - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
 
-  EKSCluster:
+  CapstoneProjectCluster:
     Type: AWS::EKS::Cluster
     Properties:
-      Version: "1.27"
+      Version: "1.26"
+      Name: !Sub ${EnvironmentName}-cluster
       RoleArn: !GetAtt EKSClusterRole.Arn
       ResourcesVpcConfig:
         SecurityGroupIds:
