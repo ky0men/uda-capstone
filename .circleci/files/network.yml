@@ -205,4 +205,4 @@ Outputs:
     Description: Security group
     Value: !Ref SecurityGroup
     Export:
-      Name: !Sub ${EnvironmentName}-SE_GR
+      Name: !Sub ${EnvironmentName}-SE-GR
