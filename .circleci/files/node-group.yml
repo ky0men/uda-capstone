@@ -155,7 +155,7 @@ Outputs:
     Description: The node instance role
     Value: !GetAtt InstanceRole.Arn
     Export:
-      Name: !Sub ${EnvironmentName}-INS_ROLE
+      Name: !Sub ${EnvironmentName}-INS-ROLE
   NodesSecurityGroup:
     Description: The security group for the nodes.
     Value: !Ref NodesSecurityGroup
