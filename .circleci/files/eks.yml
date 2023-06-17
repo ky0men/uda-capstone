@@ -1,4 +1,4 @@
-Description: Creates EKS Cluster
+Description: Create EKS Cluster
 Parameters:
   EnvironmentName:
     Description: An Environment name that will be prefixed to resources
