@@ -41,12 +41,12 @@ Resources:
       RoleArn: !GetAtt EKSClusterRole.Arn
       ResourcesVpcConfig:
         SecurityGroupIds:
-          - Fn::ImportValue: !Sub ${EnvironmentName}-scrt-group
+          - Fn::ImportValue: !Sub ${EnvironmentName}-SE_GR
         SubnetIds:
           Fn::Split:
             - ","
             - Fn::ImportValue:
-                Fn::Sub: ${EnvironmentName}-public-subnet
+                Fn::Sub: ${EnvironmentName}-PU-SUBNETS
 Outputs:
   EksId:
     Description: EKS id

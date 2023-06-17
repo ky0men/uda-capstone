@@ -26,10 +26,16 @@ Parameters:
     Type: AWS::EC2::KeyPair::KeyName
 
 Resources:
-  NodeInstanceRole:
-    Type: "AWS::IAM::Role"
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
     Properties:
-      RoleName: !Sub ${EnvironmentName}-EKSRole
+      Path: "/"
+      Roles:
+        - !Ref InstanceRole
+
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -38,38 +44,120 @@ Resources:
               Service:
                 - ec2.amazonaws.com
             Action:
-              - "sts:AssumeRole"
+              - sts:AssumeRole
+      Path: "/"
       ManagedPolicyArns:
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy"
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEKS_CNI_Policy"
-        - !Sub "arn:${AWS::Partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-      Path: /
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
 
-
-  NodeGroup:
-    Type: AWS::EKS::Nodegroup
+  NodesSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
     Properties:
-      ClusterName: !Sub ${EnvironmentName}-cluster
-      NodeRole: !GetAtt NodeInstanceRole.Arn
-      NodegroupName: !Sub ${EnvironmentName}-nodegroup
-      ScalingConfig:
-        MinSize: !Ref MinSize
-        MaxSize: !Ref MaxSize
-        DesiredSize: !Ref DesiredSize
-      Subnets:
+      GroupDescription: Security group for the nodes.
+      VpcId:
+        Fn::ImportValue: !Sub "${EnvironmentName}-VPC"
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 1025
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 0
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 1025
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: !Sub
+            - "kubernetes.io/cluster/${EksId}"
+            - EksId:
+                Fn::ImportValue: !Sub "${EnvironmentName}-EKSCluster"
+          Value: "owned"
+
+  NodesAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      DesiredCapacity: "3"
+      LaunchConfigurationName: !Ref LaunchConfiguration
+      MinSize: !Ref MinSize
+      MaxSize: !Ref MaxSize
+      VPCZoneIdentifier:
         Fn::Split:
           - ","
           - Fn::ImportValue:
-              Fn::Sub: ${EnvironmentName}-public-subnet
+              Fn::Sub: ${EnvironmentName}-PU-SUBNETS
+      Tags:
+        - Key: Name
+          Value: !Sub
+            - "${EksId}-CapstoneNodesGroup-Node"
+            - EksId:
+                Fn::ImportValue: !Sub "${EnvironmentName}-EKSCluster"
+          PropagateAtLaunch: "true"
+        - Key: !Sub
+            - "kubernetes.io/cluster/${EksId}"
+            - EksId:
+                Fn::ImportValue: !Sub "${EnvironmentName}-EKSCluster"
+          Value: "owned"
+          PropagateAtLaunch: "true"
+    UpdatePolicy:
+      AutoScalingRollingUpdate:
+        MaxBatchSize: "1"
+        MinInstancesInService: 3
+        PauseTime: "PT5M"
+
+  LaunchConfiguration:
+    Type: AWS::AutoScaling::LaunchConfiguration
+    Properties:
+      AssociatePublicIpAddress: "true"
+      IamInstanceProfile: !Ref InstanceProfile
+      ImageId: !Ref ImageID
+      InstanceType: t2.medium
+      KeyName: !Ref KeyPairName
+      SecurityGroups:
+        - !Ref NodesSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 10
+            VolumeType: gp2
+            DeleteOnTermination: true
+      UserData:
+        Fn::Base64: !Sub
+          - |
+            #!/bin/bash
+            set -o xtrace
+            /etc/eks/bootstrap.sh ${EksId}
+            /opt/aws/bin/cfn-signal --exit-code $? \
+                     --stack  ${AWS::StackName} \
+                     --resource NodesAutoScalingGroup  \
+                     --region ${AWS::Region}
+          - EksId:
+              Fn::ImportValue: !Sub "${EnvironmentName}-EKSCluster"
 
 Outputs:
-  NodeInstanceRole:
+  InstanceRole:
     Description: The node instance role
-    Value: !GetAtt NodeInstanceRole.Arn
+    Value: !GetAtt InstanceRole.Arn
     Export:
-      Name: !Sub ${EnvironmentName}-node-instance
-  NodeGroup:
-    Description: The node group for EKS
-    Value: !Ref NodeGroup
+      Name: !Sub ${EnvironmentName}-INS_ROLE
+  NodesSecurityGroup:
+    Description: The security group for the nodes.
+    Value: !Ref NodesSecurityGroup
     Export:
-      Name: !Sub ${EnvironmentName}-node-group
+      Name: !Sub ${EnvironmentName}-N-SGR

@@ -7,22 +7,21 @@ Parameters:
     Default: capstone
 
 Resources:
-
   myVPC: #create VPC
-    Type: 'AWS::EC2::VPC'
+    Type: "AWS::EC2::VPC"
     Properties:
       CidrBlock: 10.0.0.0/16
-      EnableDnsSupport: 'true'
-      EnableDnsHostnames: 'true'
+      EnableDnsSupport: "true"
+      EnableDnsHostnames: "true"
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-vpc
 
   PublicSubnet1a: #crate public subnet
-    Type: 'AWS::EC2::Subnet'
+    Type: "AWS::EC2::Subnet"
     Properties:
       VpcId: !Ref myVPC
-      AvailabilityZone: 'us-east-1a'
+      AvailabilityZone: "us-east-1a"
       CidrBlock: 10.0.0.0/24
       MapPublicIpOnLaunch: true
       Tags:
@@ -32,10 +31,10 @@ Resources:
           Value: 1
 
   PublicSubnet1b: #crate public subnet
-    Type: 'AWS::EC2::Subnet'
+    Type: "AWS::EC2::Subnet"
     Properties:
       VpcId: !Ref myVPC
-      AvailabilityZone: 'us-east-1b'
+      AvailabilityZone: "us-east-1b"
       CidrBlock: 10.0.1.0/24
       MapPublicIpOnLaunch: true
       Tags:
@@ -45,12 +44,12 @@ Resources:
           Value: 1
 
   PrivateSubnet1a: #crate private subnet
-    Type: 'AWS::EC2::Subnet'
+    Type: "AWS::EC2::Subnet"
     Properties:
       VpcId: !Ref myVPC
-      AvailabilityZone: 'us-east-1a'
-      CidrBlock:  10.0.2.0/24
-      MapPublicIpOnLaunch: false 
+      AvailabilityZone: "us-east-1a"
+      CidrBlock: 10.0.2.0/24
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-private-subnet-a01
@@ -58,34 +57,34 @@ Resources:
           Value: 1
 
   PrivateSubnet1b: #crate private subnet
-    Type: 'AWS::EC2::Subnet'
+    Type: "AWS::EC2::Subnet"
     Properties:
       VpcId: !Ref myVPC
-      AvailabilityZone: 'us-east-1b'
+      AvailabilityZone: "us-east-1b"
       CidrBlock: 10.0.3.0/24
-      MapPublicIpOnLaunch: false 
+      MapPublicIpOnLaunch: false
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-private-subnet-b01
         - Key: kubernetes.io/role/elb
           Value: 1
 
-#==============================================================================
+  #==============================================================================
 
   InternetGateway:
-    Type: 'AWS::EC2::InternetGateway'
+    Type: "AWS::EC2::InternetGateway"
     Properties: {}
 
   VPCGatewayAttachment: #attach internet gateway to vpc
-    Type: 'AWS::EC2::VPCGatewayAttachment'
+    Type: "AWS::EC2::VPCGatewayAttachment"
     Properties:
       InternetGatewayId: !Ref InternetGateway
       VpcId: !Ref myVPC
 
   #==============================================================================
-# Public subnet A
+  # Public subnet A
   PublicRouteTableA: #create public route table
-    Type: 'AWS::EC2::RouteTable'
+    Type: "AWS::EC2::RouteTable"
     Properties:
       VpcId: !Ref myVPC
       Tags:
@@ -93,52 +92,52 @@ Resources:
           Value: !Sub ${EnvironmentName}-public-route-a
 
   PrivateRouteTableA: #create private route table
-    Type: 'AWS::EC2::RouteTable'
+    Type: "AWS::EC2::RouteTable"
     Properties:
-      VpcId:  !Ref myVPC 
+      VpcId: !Ref myVPC
       Tags:
         - Key: Name
           Value: !Sub ${EnvironmentName}-private-route-a
 
   AddPublicSubnetToPublicRouteTable1a: #add public subnet to route table
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
     Properties:
       RouteTableId: !Ref PublicRouteTableA
       SubnetId: !Ref PublicSubnet1a
 
   AddPrivateSubnet1aToPrivateRouteTable1a: #add private subnet to route table
-    Type: 'AWS::EC2::SubnetRouteTableAssociation'
+    Type: "AWS::EC2::SubnetRouteTableAssociation"
     Properties:
       RouteTableId: !Ref PrivateRouteTableA
       SubnetId: !Ref PrivateSubnet1a
 
-#==============================================================================
+  #==============================================================================
 
   NatGateway1EIP:
-      Type: AWS::EC2::EIP
-      DependsOn: VPCGatewayAttachment
-      Properties: 
-          Domain: vpc
+    Type: AWS::EC2::EIP
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      Domain: vpc
 
   NatGateway2EIP:
-      Type: AWS::EC2::EIP
-      DependsOn: VPCGatewayAttachment
-      Properties:
-          Domain: vpc
+    Type: AWS::EC2::EIP
+    DependsOn: VPCGatewayAttachment
+    Properties:
+      Domain: vpc
 
-  NatGateway1: 
-      Type: AWS::EC2::NatGateway
-      Properties: 
-          AllocationId: !GetAtt NatGateway1EIP.AllocationId
-          SubnetId: !Ref PublicSubnet1a
+  NatGateway1:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway1EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1a
 
-  NatGateway2: 
-      Type: AWS::EC2::NatGateway
-      Properties:
-          AllocationId: !GetAtt NatGateway2EIP.AllocationId
-          SubnetId: !Ref PublicSubnet1b
+  NatGateway2:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt NatGateway2EIP.AllocationId
+      SubnetId: !Ref PublicSubnet1b
 
-#========================================
+  #========================================
 
   PublicRoute:
     DependsOn: VPCGatewayAttachment
@@ -165,12 +164,12 @@ Outputs:
     Value: !Ref myVPC
     Export:
       Name: !Sub ${EnvironmentName}-VPC
-  
+
   PublicSubnet1aId:
     Value: !Ref PublicSubnet1a
     Export:
       Name: !Sub ${EnvironmentName}-public-subnet-1a
-  
+
   PublicSubnet1bId:
     Value: !Ref PublicSubnet1b
     Export:
@@ -187,23 +186,23 @@ Outputs:
       Name: !Sub ${EnvironmentName}-private-subnet-1b
 
   PublicRouteTableAId:
-    Value:  !Ref PublicRouteTableA
+    Value: !Ref PublicRouteTableA
     Export:
       Name: !Sub ${EnvironmentName}-public-routetable-a
 
   PrivateRouteTableAId:
-    Value:  !Ref PrivateRouteTableA
+    Value: !Ref PrivateRouteTableA
     Export:
       Name: !Sub ${EnvironmentName}-private-routetable-a
-  
+
   SubnetIds:
     Description: Subnets ID
-    Value: !Join [ ",", [ !Ref PublicSubnet1a, !Ref PublicSubnet1b ] ]
+    Value: !Join [",", [!Ref PublicSubnet1a, !Ref PublicSubnet1b]]
     Export:
-      Name: !Sub ${EnvironmentName}-public-subnet
+      Name: !Sub ${EnvironmentName}-PU-SUBNETS
 
   SecurityGroup:
     Description: Security group
     Value: !Ref SecurityGroup
     Export:
-      Name: !Sub ${EnvironmentName}-scrt-group
+      Name: !Sub ${EnvironmentName}-SE_GR
