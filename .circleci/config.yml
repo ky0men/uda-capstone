@@ -71,6 +71,7 @@ jobs:
               --region ${AWS_DEFAULT_REGION}
       - run:
           name: Ensure EKS Cluster exists
+          no_output_timeout: 20m
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/eks.yml \
