@@ -9,7 +9,7 @@ Description: |
   - EIP
 
 Parameters:
-  ENVIRONMENTNAME:
+  EnvironmentName:
     Description: An environment name that will be prefixed to resource names.
     Default: capstone
     Type: String
@@ -39,18 +39,18 @@ Resources:
       InstanceTenancy: default
       Tags:
         - Key: Environment
-          Value: !Ref ENVIRONMENTNAME
+          Value: !Ref EnvironmentName
         - Key: Name
-          Value: !Sub ${ENVIRONMENTNAME}-VPC
+          Value: !Sub ${EnvironmentName}-VPC
 
   IG:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Environment
-          Value: !Ref ENVIRONMENTNAME
+          Value: !Ref EnvironmentName
         - Key: Name
-          Value: !Sub ${ENVIRONMENTNAME}-IG
+          Value: !Sub ${EnvironmentName}-IG
 
   IGA:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -66,9 +66,9 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Environment
-          Value: !Ref ENVIRONMENTNAME
+          Value: !Ref EnvironmentName
         - Key: Name
-          Value: !Sub ${ENVIRONMENTNAME}-PUBSUBNET1
+          Value: !Sub ${EnvironmentName}-PUBSUBNET1
       VpcId: !Ref VPC
 
   PUBSUBNET2:
@@ -79,9 +79,9 @@ Resources:
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Environment
-          Value: !Ref ENVIRONMENTNAME
+          Value: !Ref EnvironmentName
         - Key: Name
-          Value: !Sub ${ENVIRONMENTNAME}-PUBSUBNET2
+          Value: !Sub ${EnvironmentName}-PUBSUBNET2
       VpcId: !Ref VPC
 
   PUBROUTETABLE:
@@ -89,9 +89,9 @@ Resources:
     Properties:
       Tags:
         - Key: Environment
-          Value: !Ref ENVIRONMENTNAME
+          Value: !Ref EnvironmentName
         - Key: Name
-          Value: !Sub ${ENVIRONMENTNAME}-PUBROUTETABLE
+          Value: !Sub ${EnvironmentName}-PUBROUTETABLE
       VpcId: !Ref VPC
 
   PUBINTERNETROUTE:
@@ -118,22 +118,22 @@ Outputs:
     Description: The ID of the VPC
     Value: !Ref VPC
     Export:
-      Name: !Sub ${ENVIRONMENTNAME}-VPC"
+      Name: !Sub ${EnvironmentName}-VPC"
 
   StackPUBSUBNET1:
     Description: The ID of the Public Subnet 1
     Value: !Ref PUBSUBNET1
     Export:
-      Name: !Sub ${ENVIRONMENTNAME}-PUBSUBNET1"
+      Name: !Sub ${EnvironmentName}-PUBSUBNET1"
 
   StackPUBSUBNET2:
     Description: The ID of the Public Subnet 2
     Value: !Ref PUBSUBNET2
     Export:
-      Name: !Sub ${ENVIRONMENTNAME}-PUBSUBNET2"
+      Name: !Sub ${EnvironmentName}-PUBSUBNET2"
 
   StackPUBSUBNETS:
     Description: A list of the Private Subnets
     Value: !Join [",", [!Ref PUBSUBNET1, !Ref PUBSUBNET2]]
     Export:
-      Name: !Sub ${ENVIRONMENTNAME}-PUBSUBNETS"
+      Name: !Sub ${EnvironmentName}-PUBSUBNETS"

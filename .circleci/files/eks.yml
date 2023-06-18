@@ -9,7 +9,7 @@ Description: |
   - Security Group
 
 Parameters:
-  ENVIRONMENTNAME:
+  EnvironmentName:
     Description: An environment name that will be prefixed to resource names.
     Type: String
     Default: capstone
@@ -36,11 +36,11 @@ Resources:
       GroupDescription: EKS Cluster Security Group
       Tags:
         - Key: Environment
-          Value: !Ref ENVIRONMENTNAME
+          Value: !Ref EnvironmentName
         - Key: Name
-          Value: !Sub ${ENVIRONMENTNAME}-WEBSERVERGROUP
+          Value: !Sub ${EnvironmentName}-WEBSERVERGROUP
       VpcId:
-        Fn::ImportValue: ${ENVIRONMENTNAME}-VPC
+        Fn::ImportValue: ${EnvironmentName}-VPC
 
   EKSSECURITUGROUPINGRESS:
     Type: AWS::EC2::SecurityGroupIngress
@@ -61,8 +61,8 @@ Resources:
         SecurityGroupIds:
           - !Ref EKSSECURITUGROUP
         SubnetIds:
-          - Fn::ImportValue: ${ENVIRONMENTNAME}-PUBSUBNET1
-          - Fn::ImportValue: ${ENVIRONMENTNAME}-PUBSUBNET2
+          - Fn::ImportValue: ${EnvironmentName}-PUBSUBNET1
+          - Fn::ImportValue: ${EnvironmentName}-PUBSUBNET2
 
   EKSNODEGROUP:
     Type: "AWS::EKS::Nodegroup"
@@ -74,5 +74,5 @@ Resources:
         DesiredSize: 1
         MaxSize: 3
       Subnets:
-        - Fn::ImportValue: ${ENVIRONMENTNAME}-PUBSUBNET1
-        - Fn::ImportValue: ${ENVIRONMENTNAME}-PUBSUBNET2
+        - Fn::ImportValue: ${EnvironmentName}-PUBSUBNET1
+        - Fn::ImportValue: ${EnvironmentName}-PUBSUBNET2
