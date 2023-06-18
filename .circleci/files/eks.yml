@@ -40,7 +40,7 @@ Resources:
         - Key: Name
           Value: !Sub ${ENVIRONMENTNAME}-WEBSERVERGROUP
       VpcId:
-        Fn::ImportValue: capstone-stack-VPC
+        Fn::ImportValue: ${ENVIRONMENTNAME}-VPC
 
   EKSSECURITUGROUPINGRESS:
     Type: AWS::EC2::SecurityGroupIngress
@@ -55,14 +55,14 @@ Resources:
     Type: "AWS::EKS::Cluster"
     Properties:
       Name: EKSCLUSTER
-      Version: "1.15"
+      Version: "1.26"
       RoleArn: !Ref EKSROLE
       ResourcesVpcConfig:
         SecurityGroupIds:
           - !Ref EKSSECURITUGROUP
         SubnetIds:
-          - Fn::ImportValue: capstone-stack-PUBSUBNET1
-          - Fn::ImportValue: capstone-stack-PUBSUBNET2
+          - Fn::ImportValue: ${ENVIRONMENTNAME}-PUBSUBNET1
+          - Fn::ImportValue: ${ENVIRONMENTNAME}-PUBSUBNET2
 
   EKSNODEGROUP:
     Type: "AWS::EKS::Nodegroup"
@@ -74,5 +74,5 @@ Resources:
         DesiredSize: 1
         MaxSize: 3
       Subnets:
-        - Fn::ImportValue: capstone-stack-PUBSUBNET1
-        - Fn::ImportValue: capstone-stack-PUBSUBNET2
+        - Fn::ImportValue: ${ENVIRONMENTNAME}-PUBSUBNET1
+        - Fn::ImportValue: ${ENVIRONMENTNAME}-PUBSUBNET2

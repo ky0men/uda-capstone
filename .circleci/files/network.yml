@@ -118,22 +118,22 @@ Outputs:
     Description: The ID of the VPC
     Value: !Ref VPC
     Export:
-      Name: !Sub "${AWS::StackName}-VPC"
+      Name: !Sub ${ENVIRONMENTNAME}-VPC"
 
   StackPUBSUBNET1:
     Description: The ID of the Public Subnet 1
     Value: !Ref PUBSUBNET1
     Export:
-      Name: !Sub "${AWS::StackName}-PUBSUBNET1"
+      Name: !Sub ${ENVIRONMENTNAME}-PUBSUBNET1"
 
   StackPUBSUBNET2:
     Description: The ID of the Public Subnet 2
     Value: !Ref PUBSUBNET2
     Export:
-      Name: !Sub "${AWS::StackName}-PUBSUBNET2"
+      Name: !Sub ${ENVIRONMENTNAME}-PUBSUBNET2"
 
   StackPUBSUBNETS:
     Description: A list of the Private Subnets
     Value: !Join [",", [!Ref PUBSUBNET1, !Ref PUBSUBNET2]]
     Export:
-      Name: !Sub "${AWS::StackName}-PUBSUBNETS"
+      Name: !Sub ${ENVIRONMENTNAME}-PUBSUBNETS"
