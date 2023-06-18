@@ -74,8 +74,8 @@ Outputs:
     Value: !GetAtt InstanceRole.Arn
     Export:
       Name: !Sub ${EnvironmentName}-INS-ROLE
-  NodesSecurityGroup:
-    Description: The security group for the nodes.
-    Value: !Ref NodesSecurityGroup
+  NodeGroup:
+    Description: The node group for EKS
+    Value: !Ref NodeGroup
     Export:
-      Name: !Sub ${EnvironmentName}-N-SGR
+      Name: !Sub ${EnvironmentName}-NGR
