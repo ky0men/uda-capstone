@@ -79,16 +79,16 @@ jobs:
               --stack-name "eks-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
-      - run:
-          name: Ensure Nodegroup exists
-          no_output_timeout: 20m
-          command: |
-            aws cloudformation deploy \
-              --template-file .circleci/files/node-group.yml \
-              --tags project=uda-capstone \
-              --stack-name "eks-nodegroup-${CIRCLE_WORKFLOW_ID:0:7}" \
-              --region ${AWS_DEFAULT_REGION} \
-              --capabilities CAPABILITY_NAMED_IAM
+      # - run:
+      #     name: Ensure Nodegroup exists
+      #     no_output_timeout: 20m
+      #     command: |
+      #       aws cloudformation deploy \
+      #         --template-file .circleci/files/node-group.yml \
+      #         --tags project=uda-capstone \
+      #         --stack-name "eks-nodegroup-${CIRCLE_WORKFLOW_ID:0:7}" \
+      #         --region ${AWS_DEFAULT_REGION} \
+      #         --capabilities CAPABILITY_NAMED_IAM
       # - run:
       #     name: Ensure management instances exists
       #     command: |
