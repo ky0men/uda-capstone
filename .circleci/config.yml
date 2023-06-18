@@ -80,150 +80,51 @@ jobs:
       #         --region ${AWS_DEFAULT_REGION} \
       #         --capabilities CAPABILITY_NAMED_IAM
 
-      #----------------
-      # - run:
-      #     name: Ensure Nodegroup exists
-      #     no_output_timeout: 20m
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/node-group.yml \
-      #         --tags project=uda-capstone \
-      #         --stack-name "eks-nodegroup-${CIRCLE_WORKFLOW_ID:0:7}" \
-      #         --region ${AWS_DEFAULT_REGION} \
-      #         --capabilities CAPABILITY_NAMED_IAM
-      # - run:
-      #     name: Ensure management instances exists
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file cloudformation/management.yml \
-      #         --tags project=${ENVIRONMENT_NAME}-project \
-      #         --stack-name "${ENVIRONMENT_NAME}-eks-management" \
-      #         --region ${AWS_DEFAULT_REGION} \
-      #         --parameter-overrides file://cloudformation/management-parameters.json \
-      #         --output text >> ~/checkIfDeployed.txt
-      #       cat ~/checkIfDeployed.txt
-      # - run:
-      #     name: Extract the IPs of the management instances for Ansible
-      #     command: |
-      #       echo [management] > ~/inventory.txt
-      #       aws ec2 describe-instances \
-      #         --region "${AWS_DEFAULT_REGION}" \
-      #         --query 'Reservations[*].Instances[*].PublicIpAddress' \
-      #         --filters "Name=tag:Name,Values=${ENVIRONMENT_NAME}-management*" \
-      #         --output text >> ~/inventory.txt
-      #       cat ~/inventory.txt
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - inventory.txt
-      #       - checkIfDeployed.txt
-  docker-container:
-    docker:
-      - image: circleci/golang:1.15
-    steps:
-      - checkout
-      - run:
-          name: Run docker image
-          command: |
-            docker run -d $DOCKER_PATH:$CIRCLE_WORKFLOW_ID
-  # configure-infrastructure:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "d4:2f:91:66:b5:0d:84:24:4a:09:2c:d6:8a:c1:0f:91"
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           if grep -q "No changes to deploy" ~/checkIfDeployed.txt
-  #             then
-  #               cat ~/inventory.txt
-  #               echo "Our management instances are already configured."
-  #             else
-  #               cat ~/inventory.txt
-  #               cd ansible
-  #               ansible-playbook -i ~/inventory.txt configure-server.yml
-  #             fi
-
-  # configure-cluster:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "d4:2f:91:66:b5:0d:84:24:4a:09:2c:d6:8a:c1:0f:91"
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible
-  #     - run:
-  #         name: Configure server
-  #         command: |
-  #           if grep -q "No changes to deploy" ~/checkIfDeployed.txt
-  #             then
-  #               cat ~/inventory.txt
-  #               echo "Our management instances are already configured."
-  #             else
-  #               cat ~/inventory.txt
-  #               cd ansible
-  #               ansible-playbook -i ~/inventory.txt configure-cluster.yml
-  #             fi
-  #     - run:
-  #         name: Wait for LoadBalancer's domain to become reachable
-  #         command: |
-  #           if grep -q "No changes to deploy" ~/checkIfDeployed.txt
-  #             then
-  #               cat ~/inventory.txt
-  #               echo "Our management instances are already configured."
-  #             else
-  #               cat ~/inventory.txt
-  #               echo "Wait 60 seconds..."
-  #               sleep 60
-  #             fi
-  #     - run:
-  #         name: Display the LoadBalancer's DNS name
-  #         command: |
-  #           cat ~/inventory.txt
-  #           cd ansible
-  #           ansible-playbook -i ~/inventory.txt save-elb-dns.yml
-  #           cat ~/elb_dns.txt
-  #     - persist_to_workspace:
-  #         root: ~/
-  #         paths:
-  #           - elb_dns.txt
-
-  # deploy-docker:
-  #   docker:
-  #     - image: python:3.7-alpine3.11
-  #   steps:
-  #     - checkout
-  #     - add_ssh_keys:
-  #         fingerprints:
-  #           - "d4:2f:91:66:b5:0d:84:24:4a:09:2c:d6:8a:c1:0f:91"
-  #     - attach_workspace:
-  #         at: ~/
-  #     - run:
-  #         name: Install dependencies
-  #         command: |
-  #           apk add --update ansible
-  #     - run:
-  #         name: Deploy newest Docker Image
-  #         command: |
-  #           cat ~/inventory.txt
-  #           cd ansible
-  #           ansible-playbook -i ~/inventory.txt deploy-app.yml
-  #         no_output_timeout: 2m
+deploy:
+  docker:
+    - image: cimg/python:3.11.4
+  parameters:
+    cluster-name:
+      description: |
+        Name of the EKS cluster
+      type: string
+      # sửa tên cluster
+      default: "EKSCLUSTER"
+    aws-region:
+      description: |
+        AWS region
+      type: string
+      default: "us-east-1"
+  steps:
+    - checkout
+    - setup_remote_docker
+    - run:
+        name: Install dependencies
+        command: |
+          sudo apt install -y tar gzip curl
+    - kubernetes/install-kubectl
+    - aws-eks/update-kubeconfig-with-authenticator:
+        cluster-name: << parameters.cluster-name >>
+        aws-region: << parameters.aws-region >>
+        install-kubectl: true
+    - kubernetes/create-or-update-resource:
+        resource-file-path: .circleci/kubernetes/deployment.yml
+        resource-name: deployment/capstone
+        get-rollout-status: true
+        show-kubectl-command: true
+    - kubernetes/create-or-update-resource:
+        resource-file-path: .circleci/kubernetes/aws-authen-cm.yml
+        resource-name: configmap/aws-auth
+    - run:
+        name: Test cluster
+        command: |
+          kubectl get nodes
+          kubectl get deployment
+          kubectl get pod -o wide
+          kubectl get services
+    - run:
+        name: Cleaning up
+        command: docker system prune
 
 workflows:
   default:
@@ -241,8 +142,9 @@ workflows:
             branches:
               only:
                 - master
-      - docker-container:
+      - deploy:
           requires:
+            - deploy-infrastructure
             - upload-docker
       # - configure-infrastructure:
       #     requires:
