@@ -118,22 +118,22 @@ Outputs:
     Description: The ID of the VPC
     Value: !Ref VPC
     Export:
-      Name: !Sub ${EnvironmentName}-VPC"
+      Name: !Sub ${EnvironmentName}-VPC
 
   PUBSUBNET1:
     Description: The ID of the Public Subnet 1
     Value: !Ref PUBSUBNET1
     Export:
-      Name: !Sub ${EnvironmentName}-PUBSUBNET1"
+      Name: !Sub ${EnvironmentName}-PUBSUBNET1
 
   PUBSUBNET2:
     Description: The ID of the Public Subnet 2
     Value: !Ref PUBSUBNET2
     Export:
-      Name: !Sub ${EnvironmentName}-PUBSUBNET2"
+      Name: !Sub ${EnvironmentName}-PUBSUBNET2
 
   PUBSUBNETS:
     Description: A list of the Private Subnets
     Value: !Join [",", [!Ref PUBSUBNET1, !Ref PUBSUBNET2]]
     Export:
-      Name: !Sub ${EnvironmentName}-PUBSUBNETS"
+      Name: !Sub ${EnvironmentName}-PUBSUBNETS
