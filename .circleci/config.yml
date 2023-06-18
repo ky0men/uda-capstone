@@ -111,7 +111,7 @@ jobs:
           install-kubectl: true
       - kubernetes/create-or-update-resource:
           resource-file-path: .circleci/kubernetes/deployment.yml
-          resource-name: deployment/capstone
+          resource-name: deployment/uda-final
           get-rollout-status: true
           show-kubectl-command: true
       - kubernetes/create-or-update-resource:
