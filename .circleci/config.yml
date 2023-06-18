@@ -116,7 +116,7 @@ jobs:
           show-kubectl-command: true
       - kubernetes/create-or-update-resource:
           resource-file-path: .circleci/kubernetes/loadbalancer.yml
-          resource-name: deployment/uda-final
+          resource-name: service/uda-final
           get-rollout-status: true
           show-kubectl-command: true
       - kubernetes/create-or-update-resource:
