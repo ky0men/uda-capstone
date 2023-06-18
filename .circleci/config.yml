@@ -69,7 +69,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/network.yml \
               --tags project=uda-capstone \
-              --stack-name "eks-network-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name "capstone-eks-network" \
               --region ${AWS_DEFAULT_REGION}
       - run:
           name: Ensure EKS Cluster exists
@@ -78,7 +78,7 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/eks.yml \
               --tags project=uda-capstone \
-              --stack-name "eks-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name "capstone-eks-cluster-node" \
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
 
