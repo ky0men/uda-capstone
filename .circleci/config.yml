@@ -61,24 +61,24 @@ jobs:
       - run:
           name: Install dependencies
           command: yum install -y tar gzip
-      # - run:
-      #     name: Ensure EKS network exists
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/network.yml \
-      #         --tags project=uda-capstone \
-      #         --stack-name "eks-network-${CIRCLE_WORKFLOW_ID:0:7}" \
-      #         --region ${AWS_DEFAULT_REGION}
-      # - run:
-      #     name: Ensure EKS Cluster exists
-      #     no_output_timeout: 20m
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/eks.yml \
-      #         --tags project=uda-capstone \
-      #         --stack-name "eks-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
-      #         --region ${AWS_DEFAULT_REGION} \
-      #         --capabilities CAPABILITY_NAMED_IAM
+      - run:
+          name: Ensure EKS network exists
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/network.yml \
+              --tags project=uda-capstone \
+              --stack-name "eks-network-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --region ${AWS_DEFAULT_REGION}
+      - run:
+          name: Ensure EKS Cluster exists
+          no_output_timeout: 20m
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/eks.yml \
+              --tags project=uda-capstone \
+              --stack-name "eks-cluster-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --region ${AWS_DEFAULT_REGION} \
+              --capabilities CAPABILITY_NAMED_IAM
       - run:
           name: Ensure Nodegroup exists
           no_output_timeout: 20m
