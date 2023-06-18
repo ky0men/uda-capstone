@@ -65,9 +65,9 @@ Resources:
       ClusterName: !Ref EKSCLUSTER
       NodeRole: !Ref EKSNODEGROUPROLE
       ScalingConfig:
-        MinSize: 1
-        DesiredSize: 1
-        MaxSize: 3
+        MinSize: 2
+        DesiredSize: 4
+        MaxSize: 6
       Subnets:
         - Fn::ImportValue: capstone-PUBSUBNET1
         - Fn::ImportValue: capstone-PUBSUBNET2
