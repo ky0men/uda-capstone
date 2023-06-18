@@ -22,7 +22,7 @@ spec:
         app: uda-final
     spec:
       containers:
-        - image: dienpp/uda-final
+        - image: dienpp/uda-final:latest
           imagePullPolicy: Always
           name: uda-final
           ports:
