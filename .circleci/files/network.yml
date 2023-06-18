@@ -114,25 +114,25 @@ Resources:
       SubnetId: !Ref PUBSUBNET2
 
 Outputs:
-  StackVPC:
+  VPC:
     Description: The ID of the VPC
     Value: !Ref VPC
     Export:
       Name: !Sub ${EnvironmentName}-VPC"
 
-  StackPUBSUBNET1:
+  PUBSUBNET1:
     Description: The ID of the Public Subnet 1
     Value: !Ref PUBSUBNET1
     Export:
       Name: !Sub ${EnvironmentName}-PUBSUBNET1"
 
-  StackPUBSUBNET2:
+  PUBSUBNET2:
     Description: The ID of the Public Subnet 2
     Value: !Ref PUBSUBNET2
     Export:
       Name: !Sub ${EnvironmentName}-PUBSUBNET2"
 
-  StackPUBSUBNETS:
+  PUBSUBNETS:
     Description: A list of the Private Subnets
     Value: !Join [",", [!Ref PUBSUBNET1, !Ref PUBSUBNET2]]
     Export:
