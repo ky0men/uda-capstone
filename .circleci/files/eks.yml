@@ -14,20 +14,15 @@ Parameters:
     Type: String
     Default: capstone
 
-  MYIP:
-    Description: Home IP to access the bastion
-    Type: String
-    Default: 79.155.6.195/32
-
   EKSROLE:
     Description: Role Assigned to the EKS Cluster
     Type: String
-    Default: arn:aws:iam::628641662978:role/eksServiceRole
+    Default: arn:aws:iam::447919180571:role/capstoneEKSServiceRole
 
   EKSNODEGROUPROLE:
     Description: Role Assigned to the EKS NodeGroup
     Type: String
-    Default: arn:aws:iam::628641662978:role/NodeInstanceRole
+    Default: arn:aws:iam::447919180571:role/capstoneNodeInstanceRole
 
 Resources:
   EKSSECURITUGROUP:
