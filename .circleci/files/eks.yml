@@ -34,6 +34,8 @@ Resources:
           Value: !Ref EnvironmentName
         - Key: Name
           Value: !Sub ${EnvironmentName}-WEBSERVERGROUP
+        - Key: "kubernetes.io/cluster/EKSCLUSTER"
+          Value: "owned"
       VpcId:
         Fn::ImportValue: capstone-VPC
 
