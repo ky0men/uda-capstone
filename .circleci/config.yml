@@ -142,4 +142,4 @@ workflows:
       - deploy-docker:
           requires:
             - deploy-infrastructure
-            - upload-docker
+            - push-to-docker

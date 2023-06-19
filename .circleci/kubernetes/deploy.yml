@@ -5,16 +5,16 @@ metadata:
   labels:
     app: uda-final
 spec:
-  progressDeadlineSeconds: 3600
+  # progressDeadlineSeconds: 3600
   replicas: 3
   selector:
     matchLabels:
       app: uda-final
-  strategy:
-    rollingUpdate:
-      maxSurge: 25%
-      maxUnavailable: 25%
-    type: RollingUpdate
+  # strategy:
+  #   rollingUpdate:
+  #     maxSurge: 25%
+  #     maxUnavailable: 25%
+  #   type: RollingUpdate
   template:
     metadata:
       labels:
