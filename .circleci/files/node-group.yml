@@ -7,25 +7,25 @@ Parameters:
     Type: String
     Default: capstone
 
-  ImageID:
-    Description: An image ID for EC2 Instance
-    Type: String
+  # ImageID:
+  #   Description: An image ID for EC2 Instance
+  #   Type: String
 
-  KeyPairName:
-    Description: The EC2 Key Pair to allow SSH access to the instances
-    Type: AWS::EC2::KeyPair::KeyName
+  # KeyPairName:
+  #   Description: The EC2 Key Pair to allow SSH access to the instances
+  #   Type: AWS::EC2::KeyPair::KeyName
 
-  DesiredInstances:
-    Description: How many instances should be created.
-    Type: Number
+  # DesiredInstances:
+  #   Description: How many instances should be created.
+  #   Type: Number
 
-  MinSize:
-    Description: Minimum number of web application servers
-    Type: String
+  # MinSize:
+  #   Description: Minimum number of web application servers
+  #   Type: String
 
-  MaxSize:
-    Description: Maximum number of web application servers
-    Type: String
+  # MaxSize:
+  #   Description: Maximum number of web application servers
+  #   Type: String
 
 Resources:
   InstanceProfile:
