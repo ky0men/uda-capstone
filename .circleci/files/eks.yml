@@ -35,7 +35,7 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName}-WEBSERVERGROUP
         - Key: "kubernetes.io/cluster/EKSCLUSTER"
-          Value: "owned"
+          Value: "shared"
       VpcId:
         Fn::ImportValue: capstone-VPC
 
@@ -47,6 +47,13 @@ Resources:
       FromPort: 0
       ToPort: 65535
       SourceSecurityGroupId: !Ref EKSSECURITUGROUP
+      Tags:
+        - Key: "kubernetes.io/cluster/EKSCLUSTER"
+          Value: "shared"
+        - Key: "kubernetes.io/role/internal-elb"
+          Value: 1
+        - Key: "kubernetes.io/role/elb"
+          Value: 1
 
   EKSCLUSTER:
     Type: "AWS::EKS::Cluster"
