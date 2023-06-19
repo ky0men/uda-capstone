@@ -9,11 +9,9 @@ jobs:
     working_directory: ~/repo
     steps:
       - checkout
-      # Download and cache dependencies
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
-            # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
       - run:
           name: install dependencies
@@ -28,14 +26,13 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
-      # run lints!
       - run:
           name: Run lint
           command: |
             . venv/bin/activate
             make lint
 
-  upload-docker:
+  push-to-docker:
     docker:
       - image: circleci/golang:1.15
     working_directory: ~/repo
@@ -64,7 +61,7 @@ jobs:
           name: Install dependencies
           command: yum install -y tar gzip
       - run:
-          name: Ensure EKS network exists
+          name: Deploy EKS network
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/network.yml \
@@ -72,7 +69,7 @@ jobs:
               --stack-name "capstone-eks-network" \
               --region ${AWS_DEFAULT_REGION}
       - run:
-          name: Ensure EKS Cluster exists
+          name: Deploy EKS Cluster
           no_output_timeout: 20m
           command: |
             aws cloudformation deploy \
@@ -82,7 +79,7 @@ jobs:
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
       - run:
-          name: Ensure EKS Nod group exists
+          name: Deploy EKS node group
           no_output_timeout: 20m
           command: |
             aws cloudformation deploy \
@@ -92,7 +89,7 @@ jobs:
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
 
-  deploy:
+  deploy-docker:
     docker:
       - image: cimg/python:3.11.4
     steps:
@@ -108,18 +105,14 @@ jobs:
           aws-region: "us-east-1"
           install-kubectl: true
       - kubernetes/create-or-update-resource:
-          resource-file-path: .circleci/kubernetes/deployment.yml
+          resource-file-path: .circleci/kubernetes/deploy.yml
           resource-name: deployment/uda-final
           get-rollout-status: true
-          show-kubectl-command: true
       # - kubernetes/create-or-update-resource:
-      #     resource-file-path: .circleci/kubernetes/loadbalancer.yml
-      #     resource-name: service/uda-final
-      - kubernetes/create-or-update-resource:
-          resource-file-path: .circleci/kubernetes/aws-authen-cm.yml
-          resource-name: configmap/aws-auth
+      #     resource-file-path: .circleci/kubernetes/aws-authen.yml
+      #     resource-name: configmap/aws-auth
       - run:
-          name: Test cluster
+          name: Show log
           command: |
             kubectl get nodes
             kubectl get deployment
@@ -134,7 +127,7 @@ workflows:
   default:
     jobs:
       - test-lint
-      - upload-docker:
+      - push-to-docker:
           requires:
             - test-lint
           filters:
@@ -146,7 +139,7 @@ workflows:
             branches:
               only:
                 - master
-      - deploy:
+      - deploy-docker:
           requires:
             - deploy-infrastructure
             - upload-docker

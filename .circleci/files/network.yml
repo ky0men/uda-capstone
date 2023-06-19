@@ -1,31 +1,23 @@
-AWSTemplateFormatVersion: 2010-09-09
-
-Description: |
-  Capstone Project CloudFormation Network Deployment.
-  - VPC
-  - Subnets
-  - Internet Gateway
-  - NAT Gateway
-  - EIP
+Description: Create network capstone project
 
 Parameters:
   EnvironmentName:
-    Description: An environment name that will be prefixed to resource names.
+    Description: The enviroment name
     Default: capstone
     Type: String
 
-  VPCCIDR:
-    Description: Enter the CIDR for the the VPC. Default is 10.0.0.0/16.
+  VpcCIDR:
+    Description: The VPC CIDR. Default is 10.0.0.0/16.
     Type: String
     Default: 10.0.0.0/16
 
-  PUBSUBNET1CIDR:
-    Description: Enter the CIDR for the Public Subnet 1. Default is 10.0.1.0/24.
+  PubSubnet1CIDR:
+    Description: The Public Subnet 1 CIDR. Default is 10.0.1.0/24.
     Type: String
     Default: 10.0.1.0/24
 
-  PUBSUBNET2CIDR:
-    Description: Enter the CIDR for the Public Subnet 2. Default is 10.0.2.0/24.
+  PubSubnet2CIDR:
+    Description: The Public Subnet 2 CIDR. Default is 10.0.2.0/24.
     Type: String
     Default: 10.0.2.0/24
 
@@ -33,7 +25,7 @@ Resources:
   VPC:
     Type: AWS::EC2::VPC
     Properties:
-      CidrBlock: !Ref VPCCIDR
+      CidrBlock: !Ref VpcCIDR
       EnableDnsHostnames: true
       EnableDnsSupport: true
       InstanceTenancy: default
@@ -43,48 +35,48 @@ Resources:
         - Key: Name
           Value: !Sub ${EnvironmentName}-VPC
 
-  IG:
+  InterGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Environment
           Value: !Ref EnvironmentName
         - Key: Name
-          Value: !Sub ${EnvironmentName}-IG
+          Value: !Sub ${EnvironmentName}-InterGateway
 
-  IGA:
+  InterGatewayA:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
-      InternetGatewayId: !Ref IG
+      InternetGatewayId: !Ref InterGateway
       VpcId: !Ref VPC
 
-  PUBSUBNET1:
+  PubSubnet1:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Select [0, !GetAZs ""]
-      CidrBlock: !Ref PUBSUBNET1CIDR
+      CidrBlock: !Ref PubSubnet1CIDR
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Environment
           Value: !Ref EnvironmentName
         - Key: Name
-          Value: !Sub ${EnvironmentName}-PUBSUBNET1
+          Value: !Sub ${EnvironmentName}-PubSubnet1
       VpcId: !Ref VPC
 
-  PUBSUBNET2:
+  PubSubnet2:
     Type: AWS::EC2::Subnet
     Properties:
       AvailabilityZone: !Select [1, !GetAZs ""]
-      CidrBlock: !Ref PUBSUBNET2CIDR
+      CidrBlock: !Ref PubSubnet2CIDR
       MapPublicIpOnLaunch: true
       Tags:
         - Key: Environment
           Value: !Ref EnvironmentName
         - Key: Name
-          Value: !Sub ${EnvironmentName}-PUBSUBNET2
+          Value: !Sub ${EnvironmentName}-PubSubnet2
       VpcId: !Ref VPC
 
-  PUBROUTETABLE:
+  PubRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       Tags:
@@ -94,30 +86,30 @@ Resources:
           Value: !Sub ${EnvironmentName}-PUBROUTETABLE
       VpcId: !Ref VPC
 
-  PUBINTERNETROUTE:
+  PubInternetRoute:
     Type: AWS::EC2::Route
     Properties:
       DestinationCidrBlock: 0.0.0.0/0
-      GatewayId: !Ref IG
-      RouteTableId: !Ref PUBROUTETABLE
+      GatewayId: !Ref InterGateway
+      RouteTableId: !Ref PubRouteTable
 
-  PUBROUTEASSOCIATION1:
+  PubRouteAssociation1:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PUBROUTETABLE
-      SubnetId: !Ref PUBSUBNET1
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref PubSubnet1
 
-  PUBROUTEASSOCIATION2:
+  PubRouteAssociation2:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PUBROUTETABLE
-      SubnetId: !Ref PUBSUBNET2
+      RouteTableId: !Ref PubRouteTable
+      SubnetId: !Ref PubSubnet2
 
   DefaultSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       VpcId: !Ref VPC
-      GroupDescription: Default security group for EKS.
+      GroupDescription: EKS default security group
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 1025
@@ -135,31 +127,31 @@ Resources:
 
 Outputs:
   VPC:
-    Description: The ID of the VPC
+    Description: VPC Id
     Value: !Ref VPC
     Export:
       Name: !Sub ${EnvironmentName}-VPC
 
-  PUBSUBNET1:
-    Description: The ID of the Public Subnet 1
-    Value: !Ref PUBSUBNET1
+  PubSubnet1:
+    Description: Public Subnet 1 Id
+    Value: !Ref PubSubnet1
     Export:
       Name: !Sub ${EnvironmentName}-PUBSUBNET1
 
-  PUBSUBNET2:
-    Description: The ID of the Public Subnet 2
-    Value: !Ref PUBSUBNET2
+  PubSubnet2:
+    Description: Public Subnet 2 Id
+    Value: !Ref PubSubnet2
     Export:
       Name: !Sub ${EnvironmentName}-PUBSUBNET2
 
-  PUBSUBNETS:
-    Description: A list of the Private Subnets
-    Value: !Join [",", [!Ref PUBSUBNET1, !Ref PUBSUBNET2]]
+  PubSubnetS:
+    Description: Private Subnet List
+    Value: !Join [",", [!Ref PubSubnet1, !Ref PubSubnet2]]
     Export:
       Name: !Sub ${EnvironmentName}-PUBSUBNETS
 
   SecurityGroup:
-    Description: Cluster security group.
+    Description: Cluster security group
     Value: !Ref DefaultSecurityGroup
     Export:
       Name: !Sub ${EnvironmentName}-SCG
