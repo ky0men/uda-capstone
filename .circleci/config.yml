@@ -127,19 +127,19 @@ workflows:
   default:
     jobs:
       - test-lint
-      - push-to-docker:
-          requires:
-            - test-lint
-          filters:
-            branches:
-              only:
-                - master
-      - deploy-infrastructure:
-          filters:
-            branches:
-              only:
-                - master
-      - deploy-docker:
-          requires:
-            - deploy-infrastructure
-            - push-to-docker
+      # - push-to-docker:
+      #     requires:
+      #       - test-lint
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      # - deploy-infrastructure:
+      #     filters:
+      #       branches:
+      #         only:
+      #           - master
+      # - deploy-docker:
+      #     requires:
+      #       - deploy-infrastructure
+      #       - push-to-docker
