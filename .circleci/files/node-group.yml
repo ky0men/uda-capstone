@@ -89,8 +89,7 @@ Resources:
     Type: "AWS::EKS::Nodegroup"
     Properties:
       ClusterName: EKSCLUSTER
-      NodeRole: !Ref InstanceRole
-      NodeRoleArn: !GetAtt InstanceRole.Arn
+      NodeRole: !GetAtt InstanceRole.Arn
       ScalingConfig:
         MinSize: 2
         DesiredSize: 4
