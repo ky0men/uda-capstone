@@ -90,7 +90,7 @@ Resources:
     Properties:
       ClusterName: EKSCLUSTER
       NodeRole: !Ref InstanceRole
-      RoleArn: !GetAtt InstanceRole.Arn
+      NodeRoleArn: !GetAtt InstanceRole.Arn
       ScalingConfig:
         MinSize: 2
         DesiredSize: 4
