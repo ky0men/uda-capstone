@@ -1,5 +1,4 @@
-Description: >
-  Capstone project for Cloud DevOps Engineering Nanodegree
+Description: Create node group
 
 Parameters:
   EnvironmentName:
