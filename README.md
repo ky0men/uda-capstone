@@ -47,5 +47,5 @@ Ouput when lint success
 ![Alt text]()
 
 ## _Access the application_
-
+http://a70de49e662b349a5adc3984a90a0955-212419026.us-east-1.elb.amazonaws.com/
 ![Alt text]()
