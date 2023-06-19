@@ -29,23 +29,25 @@ I used AWS CloudFormation to deploy the Kubernetes Cluster.
 ## _Check the script's code with pylint and Hadolint_
 
 Output when lint failed
-![Alt text]()
+![Alt text](https://github.com/ky0men/uda-capstone/blob/master/ScreenShot/ScreenShot01_Lint_failed.png?raw=true)
 
 Ouput when lint success
-![Alt text]()
+![Alt text](https://github.com/ky0men/uda-capstone/blob/master/ScreenShot/ScreenShot02_Lint_success.png?raw=true)
 
 ## _CircleCi - CI/CD Pipelines_
 
-![Alt text]()
+![Alt text](https://github.com/ky0men/uda-capstone/blob/master/ScreenShot/ScreenShot03_CircleCi_Pipeline.png?raw=true)
 
 ## _Deployed Instances_
 
-![Alt text]()
+![Alt text](https://github.com/ky0men/uda-capstone/blob/master/ScreenShot/ScreenShot04_Deployed_Instances.png?raw=true)
 
 ## _Deployment is successful output_
 
-![Alt text]()
+![Alt text](https://github.com/ky0men/uda-capstone/blob/master/ScreenShot/ScreenShot05_Successfull_output.png?raw=true)
 
 ## _Access the application_
+
 http://a70de49e662b349a5adc3984a90a0955-212419026.us-east-1.elb.amazonaws.com/
-![Alt text]()
+
+![Alt text](https://github.com/ky0men/uda-capstone/blob/master/ScreenShot/ScreenShot06_Access_App.png?raw=true)
