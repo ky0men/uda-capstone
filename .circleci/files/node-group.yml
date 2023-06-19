@@ -37,10 +37,6 @@ Resources:
     Properties:
       GroupDescription: EKS Security Group
       Tags:
-        # - Key: Environment
-        #   Value: !Ref EnvironmentName
-        # - Key: Name
-        #   Value: !Sub ${EnvironmentName}-WEBSERVERGROUP
         - Key: !Sub
             - "kubernetes.io/cluster/${EksId}"
             - EksId:

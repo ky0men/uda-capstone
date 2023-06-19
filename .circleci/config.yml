@@ -108,9 +108,6 @@ jobs:
           resource-file-path: .circleci/kubernetes/deploy.yml
           resource-name: deployment/uda-final
           get-rollout-status: true
-      # - kubernetes/create-or-update-resource:
-      #     resource-file-path: .circleci/kubernetes/aws-authen.yml
-      #     resource-name: configmap/aws-auth
       - run:
           name: Show log
           command: |
