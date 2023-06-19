@@ -113,6 +113,26 @@ Resources:
       RouteTableId: !Ref PUBROUTETABLE
       SubnetId: !Ref PUBSUBNET2
 
+  DefaultSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: Default security group for EKS.
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 1025
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 1025
+          ToPort: 65535
+          CidrIp: 0.0.0.0/0
+
 Outputs:
   VPC:
     Description: The ID of the VPC
@@ -137,3 +157,9 @@ Outputs:
     Value: !Join [",", [!Ref PUBSUBNET1, !Ref PUBSUBNET2]]
     Export:
       Name: !Sub ${EnvironmentName}-PUBSUBNETS
+
+  SecurityGroup:
+    Description: Cluster security group.
+    Value: !Ref DefaultSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-SCG

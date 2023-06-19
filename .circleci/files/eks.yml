@@ -14,69 +14,118 @@ Parameters:
     Type: String
     Default: capstone
 
-  EKSROLE:
-    Description: Role Assigned to the EKS Cluster
-    Type: String
-    Default: arn:aws:iam::447919180571:role/capstoneEKSServiceRole
+  # EKSROLE:
+  #   Description: Role Assigned to the EKS Cluster
+  #   Type: String
+  #   Default: arn:aws:iam::447919180571:role/capstoneEKSServiceRole
 
-  EKSNODEGROUPROLE:
-    Description: Role Assigned to the EKS NodeGroup
-    Type: String
-    Default: arn:aws:iam::447919180571:role/capstoneNodeInstanceRole
+  # EKSNODEGROUPROLE:
+  #   Description: Role Assigned to the EKS NodeGroup
+  #   Type: String
+  #   Default: arn:aws:iam::447919180571:role/capstoneNodeInstanceRole
 
 Resources:
-  EKSSECURITUGROUP:
-    Type: AWS::EC2::SecurityGroup
+  ClusterInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
     Properties:
-      GroupDescription: EKS Cluster Security Group
-      Tags:
-        - Key: Environment
-          Value: !Ref EnvironmentName
-        - Key: Name
-          Value: !Sub ${EnvironmentName}-WEBSERVERGROUP
-        - Key: "kubernetes.io/cluster/EKSCLUSTER"
-          Value: "shared"
-      VpcId:
-        Fn::ImportValue: capstone-VPC
+      Path: "/"
+      Roles:
+        - !Ref ClusterRole
 
-  EKSSECURITUGROUPINGRESS:
-    Type: AWS::EC2::SecurityGroupIngress
+  ClusterRole:
+    Type: AWS::IAM::Role
     Properties:
-      GroupId: !Ref EKSSECURITUGROUP
-      IpProtocol: tcp
-      FromPort: 0
-      ToPort: 65535
-      SourceSecurityGroupId: !Ref EKSSECURITUGROUP
-      Tags:
-        - Key: "kubernetes.io/cluster/EKSCLUSTER"
-          Value: "shared"
-        - Key: "kubernetes.io/role/internal-elb"
-          Value: 1
-        - Key: "kubernetes.io/role/elb"
-          Value: 1
-
-  EKSCLUSTER:
-    Type: "AWS::EKS::Cluster"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - eks.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSServicePolicy
+        - arn:aws:iam::aws:policy/ElasticLoadBalancingFullAccess
+  CapstoneEKS:
+    Type: AWS::EKS::Cluster
     Properties:
-      Name: EKSCLUSTER
-      Version: "1.26"
-      RoleArn: !Ref EKSROLE
+      Version: "1.25"
+      RoleArn: !GetAtt ClusterRole.Arn
       ResourcesVpcConfig:
         SecurityGroupIds:
-          - !Ref EKSSECURITUGROUP
+          - Fn::ImportValue: capstone-SCG
         SubnetIds:
           - Fn::ImportValue: capstone-PUBSUBNET1
           - Fn::ImportValue: capstone-PUBSUBNET2
 
-  EKSNODEGROUP:
-    Type: "AWS::EKS::Nodegroup"
-    Properties:
-      ClusterName: !Ref EKSCLUSTER
-      NodeRole: !Ref EKSNODEGROUPROLE
-      ScalingConfig:
-        MinSize: 2
-        DesiredSize: 4
-        MaxSize: 6
-      Subnets:
-        - Fn::ImportValue: capstone-PUBSUBNET1
-        - Fn::ImportValue: capstone-PUBSUBNET2
+  # EKSSECURITUGROUP:
+  #   Type: AWS::EC2::SecurityGroup
+  #   Properties:
+  #     GroupDescription: EKS Cluster Security Group
+  #     Tags:
+  #       - Key: Environment
+  #         Value: !Ref EnvironmentName
+  #       - Key: Name
+  #         Value: !Sub ${EnvironmentName}-WEBSERVERGROUP
+  #       - Key: "kubernetes.io/cluster/EKSCLUSTER"
+  #         Value: "shared"
+  #     VpcId:
+  #       Fn::ImportValue: capstone-VPC
+
+  # EKSSECURITUGROUPINGRESS:
+  #   Type: AWS::EC2::SecurityGroupIngress
+  #   Properties:
+  #     GroupId: !Ref EKSSECURITUGROUP
+  #     IpProtocol: tcp
+  #     FromPort: 0
+  #     ToPort: 65535
+  #     SourceSecurityGroupId: !Ref EKSSECURITUGROUP
+  #     Tags:
+  #       - Key: "kubernetes.io/cluster/EKSCLUSTER"
+  #         Value: "shared"
+  #       - Key: "kubernetes.io/role/internal-elb"
+  #         Value: 1
+  #       - Key: "kubernetes.io/role/elb"
+  #         Value: 1
+
+  # EKSCLUSTER:
+  #   Type: "AWS::EKS::Cluster"
+  #   Properties:
+  #     Name: EKSCLUSTER
+  #     Version: "1.26"
+  #     RoleArn: !Ref EKSROLE
+  #     ResourcesVpcConfig:
+  #       SecurityGroupIds:
+  #         - !Ref EKSSECURITUGROUP
+  #       SubnetIds:
+  #         - Fn::ImportValue: capstone-PUBSUBNET1
+  #         - Fn::ImportValue: capstone-PUBSUBNET2
+
+  # EKSNODEGROUP:
+  #   Type: "AWS::EKS::Nodegroup"
+  #   Properties:
+  #     ClusterName: !Ref EKSCLUSTER
+  #     NodeRole: !Ref EKSNODEGROUPROLE
+  #     ScalingConfig:
+  #       MinSize: 2
+  #       DesiredSize: 4
+  #       MaxSize: 6
+  #     Subnets:
+  #       - Fn::ImportValue: capstone-PUBSUBNET1
+  #       - Fn::ImportValue: capstone-PUBSUBNET2
+
+Outputs:
+  EksId:
+    Description: The EKS id.
+    Value: !Ref CapstoneEKS
+    Export:
+      Name: !Sub ${EnvironmentName}-EKS
+
+  EKSRoleArn:
+    Description: The role that Amazon EKS will use to create AWS resources for Kubernetes clusters
+    Value: !GetAtt ClusterRole.Arn
+    Export:
+      Name: !Sub "${EnvironmentName}-EKSRoleArn"

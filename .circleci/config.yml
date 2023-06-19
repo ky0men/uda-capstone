@@ -78,7 +78,17 @@ jobs:
             aws cloudformation deploy \
               --template-file .circleci/files/eks.yml \
               --tags project=uda-capstone \
-              --stack-name "capstone-eks-cluster-node" \
+              --stack-name "capstone-eks-cluster" \
+              --region ${AWS_DEFAULT_REGION} \
+              --capabilities CAPABILITY_NAMED_IAM
+      - run:
+          name: Ensure EKS Nod group exists
+          no_output_timeout: 20m
+          command: |
+            aws cloudformation deploy \
+              --template-file .circleci/files/node-group.yml \
+              --tags project=uda-capstone \
+              --stack-name "capstone-eks-node-group" \
               --region ${AWS_DEFAULT_REGION} \
               --capabilities CAPABILITY_NAMED_IAM
 
