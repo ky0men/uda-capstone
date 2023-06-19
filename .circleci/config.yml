@@ -42,18 +42,18 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
-      # - run:
-      #     name: Build docker image
-      #     command: |
-      #       docker build --tag=uda-final .
-      #       docker image ls
-      # - run:
-      #     name: Upload image to dockerhub
-      #     command: |
-      #       DOCKER_PATH=dienpp/uda-final
-      #       echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
-      #       docker tag uda-final $DOCKER_PATH
-      #       docker push $DOCKER_PATH
+      - run:
+          name: Build docker image
+          command: |
+            docker build --tag=uda-final .
+            docker image ls
+      - run:
+          name: Upload image to dockerhub
+          command: |
+            DOCKER_PATH=dienpp/uda-final
+            echo $DOCKERHUB_PASSWORD | docker login --username $DOCKERHUB_USERNAME --password-stdin
+            docker tag uda-final $DOCKER_PATH
+            docker push $DOCKER_PATH
 
   deploy-infrastructure:
     docker:
